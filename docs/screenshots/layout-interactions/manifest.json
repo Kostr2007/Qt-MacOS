@@ -1,0 +1,73 @@
+{
+  "capture_method": "QtTest.grabImage after verified interactions",
+  "test_binary_sha256": "1e249187a2d87926fac0dba86053ed773a0726519b87e841d45e3f75f92b3068",
+  "test_source": "tests/tst_layout_integration.qml",
+  "test_source_sha256": "1719e61afe8141af91be1ddc950cc83ecbb6d5c3838570ad4af69d39782cdacf",
+  "outcomes": {
+    "passed": 74,
+    "failed": 0,
+    "skipped": 0
+  },
+  "frames": [
+    {
+      "file": "01-collection-selection.png",
+      "width": 1280,
+      "height": 880,
+      "sha256": "bd57acd4b3b407bbd4b598ddf278877a04c6edf9915a559dff5df5287f80f67c"
+    },
+    {
+      "file": "02-shared-selection.png",
+      "width": 1280,
+      "height": 880,
+      "sha256": "2e57db47670f60bc503597088196b84b7666dba85546d0253ad798caa8da7094"
+    },
+    {
+      "file": "03-sorted-with-selection.png",
+      "width": 1280,
+      "height": 880,
+      "sha256": "13393b142f6b5eb8976309852cd7740bac45b0bbff69e7b2a6c5b43c60efad9c"
+    },
+    {
+      "file": "04-entered-draft.png",
+      "width": 1280,
+      "height": 880,
+      "sha256": "bb7fdc9342eaec3fbfb7d69c419d93c43ae19c27a41b002dfe1d4e2a78f00a4b"
+    },
+    {
+      "file": "05-switched-page.png",
+      "width": 1280,
+      "height": 880,
+      "sha256": "1dff30c13f42d02dca69c20562dfa9e06a9c8973691310d556c708df7fe2a4d7"
+    },
+    {
+      "file": "06-retained-draft.png",
+      "width": 1280,
+      "height": 880,
+      "sha256": "95e0e33aa0f94e0a86331900119262c7a814076ac8e75c502b9c473124d42639"
+    },
+    {
+      "file": "07-keyboard-expanded.png",
+      "width": 1280,
+      "height": 880,
+      "sha256": "def3b04bd26f2edd407aa5ab9eb790abf6500c4d4cc92ef89f1e18b8a02ba393"
+    },
+    {
+      "file": "08-keyboard-collapsed.png",
+      "width": 1280,
+      "height": 880,
+      "sha256": "6a91bd9994b277335999bb77ae8fa2b1bccbfff358286cc22ed225fd64d3acff"
+    },
+    {
+      "file": "09-column-resized.png",
+      "width": 1280,
+      "height": 880,
+      "sha256": "6759d64264b6a3e90b1bb1a55db75df020e1d1ca451b0f915f1d7ced23bfc9f1"
+    },
+    {
+      "file": "10-column-keyboard-path.png",
+      "width": 1280,
+      "height": 880,
+      "sha256": "db6074a8975db2797408079ed3c2bcce0b70a0a7655989973a6961372e51d9bd"
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "project": "Phosphor Icons core",
+  "repository": "https://github.com/phosphor-icons/core",
+  "commit": "2b75f3ad12b420c9504ef05df8d2564a28f8500e",
+  "license": "MIT",
+  "weight": "regular",
+  "files": [
+    {
+      "file": "folder.svg",
+      "upstream": "assets/regular/folder.svg",
+      "sha256": "4a882bcd4a91ae0a01887024f08d358932f183b6b171e87a3e48c5910364d507",
+      "modification": "None"
+    },
+    {
+      "file": "file.svg",
+      "upstream": "assets/regular/file.svg",
+      "sha256": "eb2dcc530fb0727a1718dfdc55a466479bb5ad7c8f0e45f1993541093c747e06",
+      "modification": "None"
+    },
+    {
+      "file": "search.svg",
+      "upstream": "assets/regular/magnifying-glass.svg",
+      "sha256": "f9fa2561978a9a3291e8ae0ebfcb651104f5069fade8f84871627bca68889cde",
+      "modification": "None; search.svg is renamed magnifying-glass.svg."
+    },
+    {
+      "file": "list.svg",
+      "upstream": "assets/regular/list.svg",
+      "sha256": "fb1851842c74b40a3f42ce3d6ae0e67ede556b624218e79c0f4ead7d9ceec51f",
+      "modification": "None"
+    },
+    {
+      "file": "squares-four.svg",
+      "upstream": "assets/regular/squares-four.svg",
+      "sha256": "f70d6b20e08e028ab5b1714077681910a2431092cf7a23b82366ddaec554ab87",
+      "modification": "None"
+    },
+    {
+      "file": "sun.svg",
+      "upstream": "assets/regular/sun.svg",
+      "sha256": "8df1c7b747774f8b2c1fe353b1b785c74aac35bfa50f2ed7d8d9a85a4191b2ac",
+      "modification": "None"
+    },
+    {
+      "file": "moon.svg",
+      "upstream": "assets/regular/moon.svg",
+      "sha256": "5c91f82aea4e7b53305bf29628caebc22a1198ba9fa46c62eef13fb8b3c3f21d",
+      "modification": "None"
+    },
+    {
+      "file": "caret-left.svg",
+      "upstream": "assets/regular/caret-left.svg",
+      "sha256": "623bf248fe21a8170344e168aaac2e174119cea5d7c5d0fb0dc84f581009475f",
+      "modification": "None"
+    },
+    {
+      "file": "caret-right.svg",
+      "upstream": "assets/regular/caret-right.svg",
+      "sha256": "e6dec01e074807965b7f3146b976a9b5e82c31d9c2c88aeb52e77cc2ab16c1d7",
+      "modification": "None"
+    },
+    {
+      "file": "gear.svg",
+      "upstream": "assets/regular/gear.svg",
+      "sha256": "5c0cb3ba307c72babf78d952d9140c682ff30307fedc7fbb87c9a293c1e2fd64",
+      "modification": "None"
+    },
+    {
+      "file": "check.svg",
+      "upstream": "assets/regular/check.svg",
+      "sha256": "cbb89a8c42f283d4f846eb935e05d88c1be04462f16480e068c0f82b9ce40b12",
+      "modification": "None"
+    },
+    {
+      "file": "folder-blue.svg",
+      "upstream": "assets/regular/folder.svg",
+      "sha256": "f2836949a6621e423f26d12b6b7abcce99772a04d451c1af5f0072fef7b21f62",
+      "modification": "Replaced currentColor with #55b6f8 for direct Qt Quick Image rendering."
+    },
+    {
+      "file": "file-blue.svg",
+      "upstream": "assets/regular/file.svg",
+      "sha256": "19b4b28ea6990db5de31ca322c5d657321911d3808e4926f4d70422b1394dcc0",
+      "modification": "Replaced currentColor with #55b6f8 for direct Qt Quick Image rendering."
+    }
+  ]
+}

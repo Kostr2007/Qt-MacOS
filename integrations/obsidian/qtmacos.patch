@@ -1,0 +1,154 @@
+diff --git a/source_files/qt_frontend/CMakeLists.txt b/source_files/qt_frontend/CMakeLists.txt
+index f6b5e80..972f9b1 100644
+--- a/source_files/qt_frontend/CMakeLists.txt
++++ b/source_files/qt_frontend/CMakeLists.txt
+@@ -1,5 +1,9 @@
+ find_package(Qt6 6.4 REQUIRED COMPONENTS Quick QuickControls2 Test)
+ qt_standard_project_setup()
++set(OBSIDIAN_QTMACOS_ROOT "" CACHE PATH "Optional Qt-MacOS source directory for the UI pilot")
++if(OBSIDIAN_QTMACOS_ROOT)
++  add_subdirectory("${OBSIDIAN_QTMACOS_ROOT}" "${CMAKE_CURRENT_BINARY_DIR}/qtmacos" EXCLUDE_FROM_ALL)
++endif()
+ add_library(obsidian-qt-core STATIC
+   configuration.cpp configuration.h
+   wadpreview.cpp wadpreview.h
+@@ -13,6 +17,18 @@ set_target_properties(obsidian-qt PROPERTIES OUTPUT_NAME obsidian)
+ target_compile_definitions(obsidian-qt PRIVATE OBSIDIAN_EXTENDED_VERSION="${PROJECT_VERSION}")
+ target_link_libraries(obsidian-qt PRIVATE obsidian-qt-core Qt6::QuickControls2)
+ set(STUDIO_QML Main.qml OptionEditor.qml ActionButton.qml Surface.qml GameSetup.qml StudioInspector.qml ParameterDiagram.qml)
++if(OBSIDIAN_QTMACOS_ROOT)
++  target_link_libraries(obsidian-qt PRIVATE qtmacosplugin)
++  target_compile_definitions(obsidian-qt PRIVATE OBSIDIAN_QTMACOS=1)
++  # Preserve the upstream interface when the pilot is disabled. The wrapper
++  # inherits its APIs so existing frontend tests still exercise the same window.
++  set_source_files_properties(Main.qml PROPERTIES QT_RESOURCE_ALIAS "BaseMain.qml")
++  list(REMOVE_ITEM STUDIO_QML ActionButton.qml Surface.qml)
++  list(APPEND STUDIO_QML mac/Main.qml mac/ActionButton.qml mac/Surface.qml)
++  foreach(component Main ActionButton Surface)
++    set_source_files_properties("mac/${component}.qml" PROPERTIES QT_RESOURCE_ALIAS "${component}.qml")
++  endforeach()
++endif()
+ qt_add_resources(obsidian-qt "interface" PREFIX "/ui"
+   BASE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${STUDIO_QML})
+ add_dependencies(obsidian-qt obsidian)
+@@ -23,6 +39,10 @@ include(CTest)
+ if(BUILD_TESTING)
+   qt_add_executable(qt-core-tests tests/test_core.cpp)
+   target_link_libraries(qt-core-tests PRIVATE obsidian-qt-core Qt6::Test Qt6::QuickControls2)
++  if(OBSIDIAN_QTMACOS_ROOT)
++    target_link_libraries(qt-core-tests PRIVATE qtmacosplugin)
++    target_compile_definitions(qt-core-tests PRIVATE OBSIDIAN_QTMACOS=1)
++  endif()
+   qt_add_resources(qt-core-tests "testinterface" PREFIX "/ui"
+     BASE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${STUDIO_QML})
+   add_dependencies(qt-core-tests obsidian)
+diff --git a/source_files/qt_frontend/mac/ActionButton.qml b/source_files/qt_frontend/mac/ActionButton.qml
+new file mode 100644
+index 0000000..72804a7
+--- /dev/null
++++ b/source_files/qt_frontend/mac/ActionButton.qml
+@@ -0,0 +1,7 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++import QtQuick
++import QtMacOS
++
++MacButton {
++    // Retain the inherited Button API (text, clicked, highlighted, enabled).
++}
+diff --git a/source_files/qt_frontend/mac/Main.qml b/source_files/qt_frontend/mac/Main.qml
+new file mode 100644
+index 0000000..34974ba
+--- /dev/null
++++ b/source_files/qt_frontend/mac/Main.qml
+@@ -0,0 +1,9 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++import QtQuick
++import QtMacOS
++
++BaseMain {
++    readonly property bool qtMacOSPilot: true
++    readonly property bool qtMacOSDark: Theme.dark
++    Binding { target: Theme; property: "dark"; value: backend.dark }
++}
+diff --git a/source_files/qt_frontend/mac/Surface.qml b/source_files/qt_frontend/mac/Surface.qml
+new file mode 100644
+index 0000000..f26f23b
+--- /dev/null
++++ b/source_files/qt_frontend/mac/Surface.qml
+@@ -0,0 +1,12 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++import QtQuick
++import QtQuick.Controls.Basic
++import QtMacOS
++
++Frame {
++    background: Rectangle {
++        radius: Theme.radius
++        color: Theme.content
++        border.color: Theme.border
++    }
++}
+diff --git a/source_files/qt_frontend/main.cpp b/source_files/qt_frontend/main.cpp
+index ad0fe11..51224aa 100644
+--- a/source_files/qt_frontend/main.cpp
++++ b/source_files/qt_frontend/main.cpp
+@@ -1,5 +1,9 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ #include "backend.h"
++#ifdef OBSIDIAN_QTMACOS
++#include <QtQml/QQmlExtensionPlugin>
++Q_IMPORT_QML_PLUGIN(QtMacOSPlugin)
++#endif
+ #include "wadpreview.h"
+ #include <QCommandLineParser>
+ #include <QCoreApplication>
+@@ -51,7 +55,11 @@ int main(int argc, char **argv) {
+         if (parser.isSet("smoke-output")) { smokeState = std::make_unique<QTemporaryDir>(); state = smokeState->path(); }
+         else state = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+     }
+-    QQuickStyle::setStyle("Fusion");
++#ifdef OBSIDIAN_QTMACOS
++        QQuickStyle::setStyle("Basic");
++#else
++        QQuickStyle::setStyle("Fusion");
++#endif
+     qmlRegisterType<WadPreview>("Obsidian",1,0,"WadView");
+     Backend backend(parser.isSet("engine") ? parser.value("engine") : enginePath(),parser.value("data-dir"),state);
+     QQmlApplicationEngine qml;
+diff --git a/source_files/qt_frontend/tests/test_core.cpp b/source_files/qt_frontend/tests/test_core.cpp
+index 39a29f1..eb533bd 100644
+--- a/source_files/qt_frontend/tests/test_core.cpp
++++ b/source_files/qt_frontend/tests/test_core.cpp
+@@ -1,5 +1,9 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ #include "../backend.h"
++#ifdef OBSIDIAN_QTMACOS
++#include <QtQml/QQmlExtensionPlugin>
++Q_IMPORT_QML_PLUGIN(QtMacOSPlugin)
++#endif
+ #include "../presentation.h"
+ #include <QQmlApplicationEngine>
+ #include <QQmlContext>
+@@ -51,12 +55,22 @@ private slots:
+     void studioNavigationAndSearch() {
+         QTemporaryDir state; Backend backend(engine,data,state.path());
+         QTRY_VERIFY_WITH_TIMEOUT(!backend.loading() && !backend.schema().isEmpty(),30000);
++    #ifdef OBSIDIAN_QTMACOS
++        QQuickStyle::setStyle("Basic");
++#else
+         QQuickStyle::setStyle("Fusion");
++#endif
+         qmlRegisterType<WadPreview>("Obsidian",1,0,"WadView");
+         QQmlApplicationEngine qml; qml.rootContext()->setContextProperty("backend",&backend);
+         qml.load(QUrl("qrc:/ui/Main.qml"));
+         QVERIFY(!qml.rootObjects().isEmpty());
+         auto *window = qml.rootObjects().first();
++#ifdef OBSIDIAN_QTMACOS
++        QVERIFY(window->property("qtMacOSPilot").toBool());
++        QCOMPARE(window->property("qtMacOSDark").toBool(), backend.dark());
++        backend.setDark(!backend.dark());
++        QTRY_COMPARE(window->property("qtMacOSDark").toBool(), backend.dark());
++#endif
+         auto evaluate = [&](const QString &expression) {
+             QQmlExpression script(qml.rootContext(),window,expression);
+             auto result=script.evaluate();

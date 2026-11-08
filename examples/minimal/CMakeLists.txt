@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.21)
+project(QtMacOSExample LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Quick QuickControls2)
+qt_standard_project_setup()
+
+# Point this cache variable to another checkout to test a pinned dependency.
+set(QTMACOS_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." CACHE PATH "Qt-MacOS source tree")
+set(QTMACOS_BUILD_GALLERY OFF CACHE BOOL "" FORCE)
+set(QTMACOS_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory("${QTMACOS_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/qtmacos")
+qt_add_executable(qtmacos-example main.cpp)
+set_target_properties(qtmacos-example PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN TRUE)
+target_link_libraries(qtmacos-example PRIVATE qtmacosplugin Qt6::Quick Qt6::QuickControls2)
+qt_add_resources(qtmacos-example interface PREFIX /example FILES Main.qml)

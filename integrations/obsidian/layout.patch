@@ -1,0 +1,358 @@
+diff --git a/source_files/qt_frontend/CMakeLists.txt b/source_files/qt_frontend/CMakeLists.txt
+index f6b5e80..3b1e35f 100644
+--- a/source_files/qt_frontend/CMakeLists.txt
++++ b/source_files/qt_frontend/CMakeLists.txt
+@@ -1,5 +1,9 @@
+ find_package(Qt6 6.4 REQUIRED COMPONENTS Quick QuickControls2 Test)
+ qt_standard_project_setup()
++set(OBSIDIAN_QTMACOS_ROOT "" CACHE PATH "Optional Qt-MacOS source directory for the UI pilot")
++if(OBSIDIAN_QTMACOS_ROOT)
++  add_subdirectory("${OBSIDIAN_QTMACOS_ROOT}" "${CMAKE_CURRENT_BINARY_DIR}/qtmacos" EXCLUDE_FROM_ALL)
++endif()
+ add_library(obsidian-qt-core STATIC
+   configuration.cpp configuration.h
+   wadpreview.cpp wadpreview.h
+@@ -13,6 +17,18 @@ set_target_properties(obsidian-qt PROPERTIES OUTPUT_NAME obsidian)
+ target_compile_definitions(obsidian-qt PRIVATE OBSIDIAN_EXTENDED_VERSION="${PROJECT_VERSION}")
+ target_link_libraries(obsidian-qt PRIVATE obsidian-qt-core Qt6::QuickControls2)
+ set(STUDIO_QML Main.qml OptionEditor.qml ActionButton.qml Surface.qml GameSetup.qml StudioInspector.qml ParameterDiagram.qml)
++if(OBSIDIAN_QTMACOS_ROOT)
++  target_link_libraries(obsidian-qt PRIVATE qtmacosplugin)
++  target_compile_definitions(obsidian-qt PRIVATE OBSIDIAN_QTMACOS=1)
++  # Preserve the upstream interface when the pilot is disabled. The wrapper
++  # inherits its APIs so existing frontend tests still exercise the same window.
++  set_source_files_properties(Main.qml PROPERTIES QT_RESOURCE_ALIAS "BaseMain.qml")
++  list(REMOVE_ITEM STUDIO_QML ActionButton.qml Surface.qml StudioInspector.qml)
++  list(APPEND STUDIO_QML mac/Main.qml mac/ActionButton.qml mac/Surface.qml mac/StudioInspector.qml)
++  foreach(component Main ActionButton Surface StudioInspector)
++    set_source_files_properties("mac/${component}.qml" PROPERTIES QT_RESOURCE_ALIAS "${component}.qml")
++  endforeach()
++endif()
+ qt_add_resources(obsidian-qt "interface" PREFIX "/ui"
+   BASE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${STUDIO_QML})
+ add_dependencies(obsidian-qt obsidian)
+@@ -23,6 +39,10 @@ include(CTest)
+ if(BUILD_TESTING)
+   qt_add_executable(qt-core-tests tests/test_core.cpp)
+   target_link_libraries(qt-core-tests PRIVATE obsidian-qt-core Qt6::Test Qt6::QuickControls2)
++  if(OBSIDIAN_QTMACOS_ROOT)
++    target_link_libraries(qt-core-tests PRIVATE qtmacosplugin)
++    target_compile_definitions(qt-core-tests PRIVATE OBSIDIAN_QTMACOS=1)
++  endif()
+   qt_add_resources(qt-core-tests "testinterface" PREFIX "/ui"
+     BASE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${STUDIO_QML})
+   add_dependencies(qt-core-tests obsidian)
+diff --git a/source_files/qt_frontend/mac/ActionButton.qml b/source_files/qt_frontend/mac/ActionButton.qml
+new file mode 100644
+index 0000000..72804a7
+--- /dev/null
++++ b/source_files/qt_frontend/mac/ActionButton.qml
+@@ -0,0 +1,7 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++import QtQuick
++import QtMacOS
++
++MacButton {
++    // Retain the inherited Button API (text, clicked, highlighted, enabled).
++}
+diff --git a/source_files/qt_frontend/mac/Main.qml b/source_files/qt_frontend/mac/Main.qml
+new file mode 100644
+index 0000000..34974ba
+--- /dev/null
++++ b/source_files/qt_frontend/mac/Main.qml
+@@ -0,0 +1,9 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++import QtQuick
++import QtMacOS
++
++BaseMain {
++    readonly property bool qtMacOSPilot: true
++    readonly property bool qtMacOSDark: Theme.dark
++    Binding { target: Theme; property: "dark"; value: backend.dark }
++}
+diff --git a/source_files/qt_frontend/mac/StudioInspector.qml b/source_files/qt_frontend/mac/StudioInspector.qml
+new file mode 100644
+index 0000000..f9da035
+--- /dev/null
++++ b/source_files/qt_frontend/mac/StudioInspector.qml
+@@ -0,0 +1,138 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++import QtQuick
++import QtQuick.Controls
++import QtMacOS
++import QtQuick.Layouts
++import Obsidian 1.0
++
++ScrollView {
++    id: inspector
++    objectName: "qtMacOSParameterInspector"
++    readonly property bool qtMacOSLayoutPilot: true
++    property var option: null
++    property string moduleId: ""
++    property string moduleTitle: ""
++    property bool showPreview: true
++    contentWidth: availableWidth
++    clip: true
++    ScrollBar.vertical.active: true
++    onOptionChanged: {
++        details.expanded = false;
++        if (contentItem)
++            contentItem.contentY = 0;
++    }
++    ColumnLayout {
++        width: inspector.availableWidth
++        spacing: 16
++        MacLabel {
++            text: "ПОЯСНЕНИЕ ПАРАМЕТРА"
++            role: MacLabel.Caption
++            font.letterSpacing: 1.4
++            Layout.fillWidth: true
++        }
++        MacLabel {
++            objectName: "inspectorTitle"
++            text: inspector.option ? inspector.option.title : "Настраивайте осознанно"
++            role: MacLabel.Title
++            wrapMode: Text.WordWrap
++            Layout.fillWidth: true
++        }
++        MacLabel {
++            text: inspector.moduleTitle
++            visible: text.length > 0
++            role: MacLabel.Secondary
++            Layout.fillWidth: true
++            wrapMode: Text.WordWrap
++        }
++        ParameterDiagram {
++            kind: inspector.option ? inspector.option.diagram : ""
++            visible: kind.length > 0
++        }
++        MacLabel {
++            text: inspector.option ? (inspector.option.summary || "Подробности этого параметра приведены в справке генератора ниже.") : "Выберите параметр кнопкой «?» или перейдите к его полю с клавиатуры. Здесь появятся объяснение и схема."
++            wrapMode: Text.WordWrap
++            Layout.fillWidth: true
++            lineHeight: 1.2
++        }
++
++        MacLabel {
++            text: inspector.option ? inspector.option.related : ""
++            visible: text.length > 0
++            Layout.fillWidth: true
++            wrapMode: Text.WordWrap
++            role: MacLabel.Secondary
++        }
++        MacBox {
++            objectName: "inspectorValueGroup"
++            visible: !!inspector.option
++            Layout.fillWidth: true
++            title: "Значение параметра"
++            padding: 12
++            spacing: 8
++            MacLabel {
++                width: parent.width
++                text: "Текущее значение"
++                role: MacLabel.Caption
++            }
++            MacLabel {
++                objectName: "inspectorCurrentValue"
++                width: parent.width
++                role: MacLabel.Heading
++                text: {
++                    backend.revision;
++                    if (!inspector.option)
++                        return "";
++                    let value = backend.value(inspector.moduleId, inspector.option.id);
++                    let choices = inspector.option.choices || [];
++                    for (let i = 0; i < choices.length; i++)
++                        if (choices[i].id === value)
++                            return choices[i].text;
++                    return inspector.option.kind === "boolean" ? (value === "1" ? "Включено" : "Выключено") : value;
++                }
++            }
++            MacLabel {
++                width: parent.width
++                text: inspector.option ? "По умолчанию: " + inspector.option.default : ""
++                role: MacLabel.Caption
++            }
++        }
++        MacDisclosureGroup {
++            id: details
++            objectName: "inspectorGeneratorHelp"
++            visible: !!inspector.option && inspector.option.tooltip.length > 0
++            title: "Справка генератора"
++            Layout.fillWidth: true
++            MacLabel {
++                objectName: "inspectorGeneratorHelpText"
++                width: parent.width
++                text: inspector.option ? inspector.option.tooltip : ""
++                role: MacLabel.Secondary
++            }
++        }
++        Rectangle {
++            visible: inspector.showPreview
++            Layout.fillWidth: true
++            implicitHeight: 1
++            color: backend.dark ? "#353d49" : "#d8dee7"
++        }
++        MacLabel {
++            visible: inspector.showPreview
++            text: "ПОСЛЕДНИЙ РЕЗУЛЬТАТ"
++            role: MacLabel.Caption
++            font.letterSpacing: 1.3
++        }
++        WadView {
++            visible: inspector.showPreview
++            Layout.fillWidth: true
++            Layout.preferredHeight: 190
++            file: backend.previewFile
++        }
++        MacLabel {
++            visible: inspector.showPreview
++            text: "Геометрия созданного WAD. Изменение настроек её не обновляет."
++            Layout.fillWidth: true
++            wrapMode: Text.WordWrap
++            role: MacLabel.Caption
++        }
++    }
++}
+diff --git a/source_files/qt_frontend/mac/Surface.qml b/source_files/qt_frontend/mac/Surface.qml
+new file mode 100644
+index 0000000..f26f23b
+--- /dev/null
++++ b/source_files/qt_frontend/mac/Surface.qml
+@@ -0,0 +1,12 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++import QtQuick
++import QtQuick.Controls.Basic
++import QtMacOS
++
++Frame {
++    background: Rectangle {
++        radius: Theme.radius
++        color: Theme.content
++        border.color: Theme.border
++    }
++}
+diff --git a/source_files/qt_frontend/main.cpp b/source_files/qt_frontend/main.cpp
+index ad0fe11..51224aa 100644
+--- a/source_files/qt_frontend/main.cpp
++++ b/source_files/qt_frontend/main.cpp
+@@ -1,5 +1,9 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ #include "backend.h"
++#ifdef OBSIDIAN_QTMACOS
++#include <QtQml/QQmlExtensionPlugin>
++Q_IMPORT_QML_PLUGIN(QtMacOSPlugin)
++#endif
+ #include "wadpreview.h"
+ #include <QCommandLineParser>
+ #include <QCoreApplication>
+@@ -51,7 +55,11 @@ int main(int argc, char **argv) {
+         if (parser.isSet("smoke-output")) { smokeState = std::make_unique<QTemporaryDir>(); state = smokeState->path(); }
+         else state = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+     }
+-    QQuickStyle::setStyle("Fusion");
++#ifdef OBSIDIAN_QTMACOS
++        QQuickStyle::setStyle("Basic");
++#else
++        QQuickStyle::setStyle("Fusion");
++#endif
+     qmlRegisterType<WadPreview>("Obsidian",1,0,"WadView");
+     Backend backend(parser.isSet("engine") ? parser.value("engine") : enginePath(),parser.value("data-dir"),state);
+     QQmlApplicationEngine qml;
+diff --git a/source_files/qt_frontend/tests/test_core.cpp b/source_files/qt_frontend/tests/test_core.cpp
+index 39a29f1..e91826c 100644
+--- a/source_files/qt_frontend/tests/test_core.cpp
++++ b/source_files/qt_frontend/tests/test_core.cpp
+@@ -1,7 +1,12 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ #include "../backend.h"
++#ifdef OBSIDIAN_QTMACOS
++#include <QtQml/QQmlExtensionPlugin>
++Q_IMPORT_QML_PLUGIN(QtMacOSPlugin)
++#endif
+ #include "../presentation.h"
+ #include <QQmlApplicationEngine>
++#include <QQmlComponent>
+ #include <QQmlContext>
+ #include <QQmlExpression>
+ #include <QQuickStyle>
+@@ -51,12 +56,22 @@ private slots:
+     void studioNavigationAndSearch() {
+         QTemporaryDir state; Backend backend(engine,data,state.path());
+         QTRY_VERIFY_WITH_TIMEOUT(!backend.loading() && !backend.schema().isEmpty(),30000);
++    #ifdef OBSIDIAN_QTMACOS
++        QQuickStyle::setStyle("Basic");
++#else
+         QQuickStyle::setStyle("Fusion");
++#endif
+         qmlRegisterType<WadPreview>("Obsidian",1,0,"WadView");
+         QQmlApplicationEngine qml; qml.rootContext()->setContextProperty("backend",&backend);
+         qml.load(QUrl("qrc:/ui/Main.qml"));
+         QVERIFY(!qml.rootObjects().isEmpty());
+         auto *window = qml.rootObjects().first();
++#ifdef OBSIDIAN_QTMACOS
++        QVERIFY(window->property("qtMacOSPilot").toBool());
++        QCOMPARE(window->property("qtMacOSDark").toBool(), backend.dark());
++        backend.setDark(!backend.dark());
++        QTRY_COMPARE(window->property("qtMacOSDark").toBool(), backend.dark());
++#endif
+         auto evaluate = [&](const QString &expression) {
+             QQmlExpression script(qml.rootContext(),window,expression);
+             auto result=script.evaluate();
+@@ -101,6 +116,56 @@ private slots:
+         QTRY_VERIFY_WITH_TIMEOUT(!backend.loading(),30000);
+         QVERIFY(!evaluate("selectedModules(true).some(function(m){return m.id==='ui_arch'})").toBool());
+     }
++#ifdef OBSIDIAN_QTMACOS
++    void qtMacOSParameterInspectorUsesLiveSchema() {
++        QTemporaryDir state; Backend backend(engine,data,state.path());
++        QTRY_VERIFY_WITH_TIMEOUT(!backend.loading() && !backend.schema().isEmpty(),30000);
++        QVariantMap selected; QString moduleId;
++        for (const auto &entry:backend.schema().value("modules").toList()) {
++            const auto module=entry.toMap();
++            if (!module.value("available").toBool()) continue;
++            for (const auto &value:module.value("options").toList()) {
++                const auto option=value.toMap();
++                if (option.value("kind")=="choice" && option.value("choices").toList().size()>1
++                    && !option.value("tooltip").toString().isEmpty()) {
++                    selected=option; moduleId=module.value("id").toString(); break;
++                }
++            }
++            if (!selected.isEmpty()) break;
++        }
++        QVERIFY(!selected.isEmpty());
++        if (QQuickStyle::name()!=QStringLiteral("Basic")) QQuickStyle::setStyle("Basic");
++        if (qmlTypeId("Obsidian",1,0,"WadView")==-1) qmlRegisterType<WadPreview>("Obsidian",1,0,"WadView");
++        QQmlApplicationEngine qml; qml.rootContext()->setContextProperty("backend",&backend);
++        QQmlComponent component(&qml,QUrl("qrc:/ui/StudioInspector.qml"));
++        QScopedPointer<QObject> inspector(component.createWithInitialProperties({
++            {"option",selected},{"moduleId",moduleId},{"showPreview",false},{"width",312},{"height",700}}));
++        QVERIFY2(inspector,qPrintable(component.errorString()));
++        QVERIFY(inspector->property("qtMacOSLayoutPilot").toBool());
++        auto *group=inspector->findChild<QObject*>("inspectorValueGroup");
++        auto *valueLabel=inspector->findChild<QObject*>("inspectorCurrentValue");
++        auto *help=inspector->findChild<QObject*>("inspectorGeneratorHelp");
++        auto *helpText=inspector->findChild<QObject*>("inspectorGeneratorHelpText");
++        QVERIFY(group); QVERIFY(valueLabel); QVERIFY(help); QVERIFY(helpText);
++        const auto choices=selected.value("choices").toList();
++        const auto old=backend.value(moduleId,selected.value("id").toString());
++        const auto replacement=choices[choices[0].toMap().value("id").toString()==old ? 1 : 0].toMap();
++        backend.setOption(moduleId,selected.value("id").toString(),replacement.value("id").toString());
++        QTRY_COMPARE(valueLabel->property("text").toString(),replacement.value("text").toString());
++        QCOMPARE(backend.value(moduleId,selected.value("id").toString()),replacement.value("id").toString());
++        QCOMPARE(helpText->property("text").toString(),selected.value("tooltip").toString());
++        QVERIFY(!help->property("expanded").toBool());
++        auto *header=qvariant_cast<QObject*>(help->property("header")); QVERIFY(header);
++        QVERIFY(QMetaObject::invokeMethod(header,"clicked"));
++        QVERIFY(help->property("expanded").toBool());
++        QVERIFY(QMetaObject::invokeMethod(header,"clicked"));
++        QVERIFY(!help->property("expanded").toBool());
++        QCOMPARE(helpText,inspector->findChild<QObject*>("inspectorGeneratorHelpText"));
++        help->setProperty("expanded",true);
++        inspector->setProperty("option",QVariant::fromValue(nullptr));
++        QVERIFY(!help->property("expanded").toBool());
++    }
++#endif
+     void configurationRoundTrip() {
+         const QByteArray input = "-- legacy\nengine = idtech_1\ngame = doom2\nseed = 18446744073709551615\nfloat_size = 42\nfuture_key = custom value\n@custom = 1\n  detail = rare\n  future_option = retained\n";
+         Configuration config, result; QString error;
