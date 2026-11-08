@@ -5,13 +5,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-latest, macos-latest]
+        # Qt 6.8.2 links AGL, which was removed from the macOS 26 SDK.
+        os: [ubuntu-22.04, windows-latest, macos-15]
     runs-on: ${{ matrix.os }}
     env:
       QT_QPA_PLATFORM: offscreen
       QT_QUICK_BACKEND: software
     steps:
       - uses: actions/checkout@v4
+      - name: Select the SDK supported by Qt 6.8.2
+        if: runner.os == 'macOS'
+        run: sudo xcode-select --switch /Applications/Xcode_16.4.app/Contents/Developer
       - uses: jurplel/install-qt-action@v4
         with:
           version: '6.8.2'

@@ -28,3 +28,8 @@ for current Linux/Windows/macOS build and test results. These checks do not
 certify native window behavior on Windows/macOS, Wayland, screen readers or
 compositor-specific effects. This release ships source rather than portable
 runtime binaries.
+
+The first CI run passed on Ubuntu but exposed an SDK incompatibility on
+`macos-latest`: Qt 6.8.2 links AGL, removed from the macOS 26 SDK. The release
+matrix pins `macos-15` and explicitly selects Xcode 16.4 for that Qt version.
+The Actions run at the release commit records the subsequent result.

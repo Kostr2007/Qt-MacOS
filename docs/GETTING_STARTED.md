@@ -149,6 +149,7 @@ fixed comparison background; it is not a live desktop blur. The checked-in
 | SVG unsupported | Install the SVG image plugin (`qt6-svg-plugins` on Debian), check plugin paths |
 | Platform plugin cannot load | Check desktop dependencies; use `offscreen` for headless captures only |
 | Failure after switching compilers | Configure a fresh directory with a matching Qt kit |
+| macOS linker cannot find AGL | Qt 6.8.2 needs the older SDK; CI uses macOS 15 with Xcode 16.4. The macOS 26 SDK removed AGL. Select a compatible SDK or validate an updated Qt kit. |
 | Opaque/shadowless outer window | Check compositor/alpha support; native window systems differ |
 
 Local validation used Debian 13, GCC 14.2, CMake 3.31.6 and Qt 6.8.2. The local

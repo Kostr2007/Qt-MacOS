@@ -25,3 +25,10 @@
 The initial release is source-only. GitHub also creates automatic source
 archives from the tag; a manually attached archive provides an explicit
 checksum for the reviewed source snapshot.
+
+Publishing the release triggers `.github/workflows/release.yml`: it checks out
+the exact tag, uses `git archive`, calculates `SHA256SUMS.txt` and attaches both
+files with the job's GitHub token. Verify this run and its uploaded assets.
+The workflow can also be dispatched manually for an existing release tag.
+It does not overwrite existing assets. Keep the checksum with the matching
+archive; GitHub's automatic archives can use different packaging bytes.
