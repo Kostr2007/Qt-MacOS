@@ -21,6 +21,7 @@ Basic.ComboBox {
         id: option
         required property int index
         objectName: "macPopupOption_" + index
+        hoverEnabled: true
         width: control.popup.width - control.popup.leftPadding - control.popup.rightPadding
         text: control.textAt(index)
         highlighted: control.highlightedIndex === index
