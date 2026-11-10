@@ -110,6 +110,7 @@ Basic.ComboBox {
                 antialiasing: true
             }
             FrameAnimation {
+                objectName: "macPopupSelectionAnimation"
                 running: control.popup.visible && options.positionInitialized && !Theme.reducedMotion
                     && (Math.abs(selection.y - options.targetY) > 0.01 || Math.abs(options.selectionVelocity) > 0.1)
                 onTriggered: {

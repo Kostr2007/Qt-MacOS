@@ -44,10 +44,14 @@ Rectangle {
             open()
             keyClick(Qt.Key_Down)
             tryVerify(() => list().selectionVelocity > 10)
+            const animation = findChild(list(), "macPopupSelectionAnimation")
+            verify(animation)
+            animation.paused = true
             const y = marker().y
             keyClick(Qt.Key_Up)
             verify(list().selectionVelocity > 0)
-            verify(Math.abs(marker().y - y) < 3)
+            compare(marker().y, y)
+            animation.paused = false
             tryCompare(marker(), "y", list().itemAtIndex(0).y)
             keyClick(Qt.Key_Down)
             keyClick(Qt.Key_Escape)
