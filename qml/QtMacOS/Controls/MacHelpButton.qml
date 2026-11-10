@@ -12,5 +12,6 @@ MacPushButton {
         border.width: control.visualFocus ? 2 : 0
         border.color: Theme.settingsAccent
         opacity: control.enabled ? 1 : 0.45
+        Behavior on color { ColorAnimation { duration: control.down ? Theme.pressDuration : Theme.colorDuration } }
     }
 }

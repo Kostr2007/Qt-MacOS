@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(QtMacOS VERSION 0.1.0 LANGUAGES CXX)
+project(QtMacOS VERSION 0.2.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick QuickControls2)
@@ -39,6 +39,11 @@ set(mac_qml
     qml/QtMacOS/SettingsIcon.qml
     qml/QtMacOS/MacWindow.qml
     qml/QtMacOS/MacDialog.qml
+    qml/QtMacOS/MacMenu.qml
+    qml/QtMacOS/MacPopupTransition.qml
+    qml/QtMacOS/MacSelectionBackground.qml
+    qml/QtMacOS/MacPopover.qml
+    qml/QtMacOS/MacToolTip.qml
     qml/QtMacOS/WindowButtons.qml
     qml/QtMacOS/Sidebar.qml
     qml/QtMacOS/SearchField.qml)
@@ -58,6 +63,9 @@ qt_add_qml_module(qtmacos
 target_link_libraries(qtmacos PUBLIC Qt6::Quick Qt6::QuickControls2)
 
 if(QTMACOS_BUILD_GALLERY OR (BUILD_TESTING AND QTMACOS_BUILD_TESTS))
+    qt_add_library(qtmacos_diagnostics STATIC diagnostics/InteractionRecorder.h diagnostics/InteractionRecorder.cpp)
+    target_include_directories(qtmacos_diagnostics PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/diagnostics")
+    target_link_libraries(qtmacos_diagnostics PUBLIC Qt6::Quick)
     qt_add_qml_module(qtmacos_demo STATIC
         URI QtMacOS.Demo VERSION 1.0 CLASS_NAME QtMacOSDemoPlugin
         RESOURCE_PREFIX /qt/qml
@@ -75,10 +83,10 @@ endforeach()
 if(QTMACOS_BUILD_GALLERY)
     qt_add_executable(qtmacos-gallery demo/main.cpp)
     set_target_properties(qtmacos-gallery PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN TRUE)
-    target_link_libraries(qtmacos-gallery PRIVATE qtmacosplugin qtmacos_demoplugin Qt6::Quick Qt6::QuickControls2)
+    target_link_libraries(qtmacos-gallery PRIVATE qtmacosplugin qtmacos_demoplugin qtmacos_diagnostics Qt6::Quick Qt6::QuickControls2)
     qt_add_resources(qtmacos-gallery gallery PREFIX /gallery FILES
         demo/Main.qml demo/FileBrowser.qml demo/FinderIcon.qml demo/FinderToolButton.qml
-        demo/FinderSidebar.qml demo/FinderThumbnail.qml demo/SettingsMain.qml demo/LayoutMain.qml)
+        demo/FinderSidebar.qml demo/FinderThumbnail.qml demo/SettingsMain.qml demo/LayoutMain.qml demo/MotionLab.qml)
     qt_add_resources(qtmacos-gallery icons PREFIX / FILES ${icon_files})
 endif()
 
@@ -86,7 +94,7 @@ if(BUILD_TESTING AND QTMACOS_BUILD_TESTS)
     find_package(Qt6 REQUIRED COMPONENTS QuickTest Test)
     qt_add_executable(qtmacos-tests tests/quicktest.cpp)
     set_target_properties(qtmacos-tests PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN TRUE)
-    target_link_libraries(qtmacos-tests PRIVATE qtmacosplugin qtmacos_demoplugin Qt6::QuickTest Qt6::Qml)
+    target_link_libraries(qtmacos-tests PRIVATE qtmacosplugin qtmacos_demoplugin qtmacos_diagnostics Qt6::QuickTest Qt6::Qml)
     qt_add_executable(workspace-model-tests tests/test_workspace_model.cpp)
     set_target_properties(workspace-model-tests PROPERTIES QT_QML_MODULE_NO_IMPORT_SCAN TRUE)
     target_link_libraries(workspace-model-tests PRIVATE qtmacos_demo Qt6::Test)

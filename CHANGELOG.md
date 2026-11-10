@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.2.0 — 2026-11-10 · Interaction preview
+
+- Shared press/release, selection, menu, tooltip, popover and dialog transitions.
+- Oval slider thumbs with bounded follow feedback, coordinated fill and handle,
+  direct logical values, keyboard/mirroring support and Reduce Motion.
+- Vector Settings icons and window buttons, overlay scrollbars and smooth sidebar
+  hover/selection, including spring motion in popup menus.
+- Search clearing, empty search results, a keyboard navigation group and neutral
+  selection when the Settings window is inactive.
+- Anchored contextual help, capsule-shaped history feedback and interruptible
+  category transitions that preserve Mouse settings and history.
+- Switch feedback with optional on/off symbols via `Theme.differentiateWithoutColor`.
+- Motion Lab, instrumented input/frame recording and offline frame inspection.
+- New screenshots, videos, release media provenance and portable documentation.
+
+Locally verified with Qt 6.12.0 / NixOS 26.11 / GCC 16 / X11/OpenGL:
+140 QML and 6 C++ outcomes, plus native interaction groups. The CI matrix uses
+Qt 6.8.2. Native macOS/Windows, Wayland, AppKit parity and a full screen-reader
+audit remain unverified for this version. This is a source-only pre-release.
+
 ## 0.1.0 — 2026-11-08 · Preview
 
 First source release. Public APIs may change in subsequent `0.x` versions.

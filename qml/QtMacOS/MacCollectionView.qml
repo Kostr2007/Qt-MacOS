@@ -81,6 +81,7 @@ FocusScope {
             kind: String(model.kind ?? "folder")
             tint: model.tint ?? "#52b9ed"
             selected: control.selectedId === itemId
+            selectionActive: control.activeFocus
             focusPolicy: Qt.NoFocus
             onActivated: {
                 control.forceActiveFocus(Qt.MouseFocusReason)

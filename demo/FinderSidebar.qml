@@ -106,16 +106,14 @@ Rectangle {
                     Accessible.name: modelData.title
                     highlighted: sidebar.selectedTitle === modelData.title
                     onClicked: sidebar.navigate(modelData.title)
-                    background: Rectangle {
-                        anchors {
-                            fill: parent
-                            topMargin: 1
-                            bottomMargin: 1
-                        }
+                    background: MacSelectionBackground {
+                        anchors { fill: parent; topMargin: 1; bottomMargin: 1 }
                         radius: 6
-                        color: navigationRow.highlighted ? sidebar.selectedBackground : navigationRow.hovered ? (sidebar.dark ? "#525254" : "#dedee0") : "transparent"
-                        border.width: navigationRow.visualFocus ? 1 : 0
-                        border.color: "#3e9df7"
+                        selected: navigationRow.highlighted
+                        hovered: navigationRow.hovered
+                        focused: navigationRow.visualFocus
+                        selectionColor: sidebar.selectedBackground
+                        hoverColor: sidebar.dark ? "#525254" : "#dedee0"
                     }
                     contentItem: RowLayout {
                         spacing: 8
@@ -159,12 +157,14 @@ Rectangle {
                 hoverEnabled: true
                 Accessible.name: qsTr("iCloud Drive")
                 onClicked: sidebar.navigate("iCloud Drive")
-                background: Rectangle {
-                    radius: 6
-                    color: sidebar.selectedTitle === "iCloud Drive" ? sidebar.selectedBackground : cloudRow.hovered ? (sidebar.dark ? "#525254" : "#dedee0") : "transparent"
-                    border.width: cloudRow.visualFocus ? 1 : 0
-                    border.color: "#3e9df7"
-                }
+                background: MacSelectionBackground {
+                        radius: 6
+                        selected: sidebar.selectedTitle === "iCloud Drive"
+                        hovered: cloudRow.hovered
+                        focused: cloudRow.visualFocus
+                        selectionColor: sidebar.selectedBackground
+                        hoverColor: sidebar.dark ? "#525254" : "#dedee0"
+                    }
                 contentItem: RowLayout {
                     spacing: 8
                     FinderIcon {
@@ -236,11 +236,13 @@ Rectangle {
                     hoverEnabled: true
                     Accessible.name: modelData.title + qsTr(" tag")
                     onClicked: sidebar.navigate(modelData.title)
-                    background: Rectangle {
+                    background: MacSelectionBackground {
                         radius: 6
-                        color: sidebar.selectedTitle === tagRow.modelData.title ? sidebar.selectedBackground : tagRow.hovered ? (sidebar.dark ? "#525254" : "#dedee0") : "transparent"
-                        border.width: tagRow.visualFocus ? 1 : 0
-                        border.color: "#3e9df7"
+                        selected: sidebar.selectedTitle === tagRow.modelData.title
+                        hovered: tagRow.hovered
+                        focused: tagRow.visualFocus
+                        selectionColor: sidebar.selectedBackground
+                        hoverColor: sidebar.dark ? "#525254" : "#dedee0"
                     }
                     contentItem: RowLayout {
                         spacing: 8

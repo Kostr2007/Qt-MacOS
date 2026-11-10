@@ -16,7 +16,7 @@ MacWindow {
     property string datasetName: argument("--dataset", "studio")
     property string evidenceState: argument("--state", "default")
     property string currentTab: evidenceState === "active" ? "build" : "overview"
-    property bool reducedMotion: false
+    property bool reducedMotion: Theme.reducedMotion
     readonly property var pageNames: [
         {
             key: "boxes",
@@ -89,6 +89,7 @@ MacWindow {
     }
     Component.onCompleted: {
         Theme.dark = Qt.application.arguments.indexOf("--dark") >= 0;
+        Theme.reducedMotion = Qt.application.arguments.indexOf("--reduce-motion") >= 0;
         if (evidenceState === "active")
             Qt.callLater(() => {
                 workspace.selectedId = workspace.entryIdAt(1);
@@ -235,6 +236,15 @@ MacWindow {
         }
         Loader {
             id: pageLoader
+            onLoaded: arrival.restart()
+            NumberAnimation {
+                id: arrival
+                target: pageLoader
+                property: "opacity"
+                from: 0; to: 1
+                duration: Theme.revealDuration
+                easing.type: Theme.motionEasing
+            }
             y: commands.y + commands.height + 20
             width: parent.width
             height: parent.height - y - 32

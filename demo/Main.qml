@@ -27,14 +27,15 @@ MacWindow {
     }
     Component.onCompleted: {
         Theme.dark = Qt.application.arguments.indexOf("--light") < 0;
+        Theme.reducedMotion = Qt.application.arguments.indexOf("--reduce-motion") >= 0;
         browser.gridMode = Qt.application.arguments.indexOf("--grid") >= 0;
     }
     Shortcut {
-        sequence: StandardKey.Find
+        sequences: [StandardKey.Find]
         onActivated: window.revealSearch()
     }
     Shortcut {
-        sequence: StandardKey.Cancel
+        sequences: [StandardKey.Cancel]
         onActivated: {
             search.clear();
             window.searchOpen = false;
@@ -229,7 +230,7 @@ MacWindow {
                 font.family: window.font.family
             }
         }
-        Menu {
+        MacMenu {
             id: viewMenu
             objectName: "viewMenu"
             x: toolbar.width - width - 24
@@ -245,6 +246,13 @@ MacWindow {
                 onTriggered: browser.gridMode = true
             }
             MenuSeparator {}
+            MenuItem {
+                objectName: "reduceMotionToggle"
+                text: qsTr("Reduce Motion")
+                checkable: true
+                checked: Theme.reducedMotion
+                onTriggered: Theme.reducedMotion = !Theme.reducedMotion
+            }
             MenuItem {
                 objectName: "themeToggle"
                 text: Theme.dark ? qsTr("Use Light Appearance") : qsTr("Use Dark Appearance")

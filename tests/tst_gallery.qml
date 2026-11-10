@@ -53,9 +53,18 @@ TestCase {
     function test_themeButton() {
         const previous = Theme.dark
         mouseClick(findChild(gallery, "moreButton"))
+        tryCompare(findChild(gallery, "viewMenu"), "opened", true)
         const item = findChild(gallery, "themeToggle")
         tryCompare(item, "visible", true)
+        verify(item.width >= 200)
         mouseClick(item)
         tryCompare(Theme, "dark", !previous)
+    }
+    function test_reduceMotionMenu() {
+        mouseClick(findChild(gallery, "moreButton"))
+        tryCompare(findChild(gallery, "viewMenu"), "opened", true)
+        mouseClick(findChild(gallery, "reduceMotionToggle"))
+        tryCompare(Theme, "reducedMotion", true)
+        Theme.reducedMotion = false
     }
 }

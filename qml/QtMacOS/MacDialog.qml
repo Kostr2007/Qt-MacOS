@@ -1,11 +1,25 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQuick.Window
 import QtQuick.Controls.Basic as Basic
 import QtMacOS
 
 Basic.Dialog {
     id: dialog
     modal: true
+    focus: true
+    property Item returnFocusItem: null
+    onAboutToShow: returnFocusItem = parent && parent.Window.window ? parent.Window.window.activeFocusItem : null
+    onClosed: {
+        if (returnFocusItem && returnFocusItem.visible && returnFocusItem.enabled)
+            returnFocusItem.forceActiveFocus(Qt.PopupFocusReason);
+    }
+    enter: MacPopupTransition {}
+    exit: MacPopupTransition { appearing: false }
+    Basic.Overlay.modal: Rectangle {
+        color: "#40000000"
+        Behavior on opacity { NumberAnimation { duration: Theme.colorDuration } }
+    }
     padding: 22
     font.pixelSize: 16
     palette.windowText: Theme.settingsText

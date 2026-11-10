@@ -162,6 +162,7 @@ Item {
                             background: Rectangle {
                                 radius: 5
                                 color: entry.chosen ? entry.currentSelection ? Theme.accent : Theme.selection : entry.hovered ? Theme.hover : "transparent"
+                                Behavior on color { ColorAnimation { duration: Theme.colorDuration } }
                                 border.width: entry.activeFocus ? 2 : 0
                                 border.color: Theme.accent
                             }

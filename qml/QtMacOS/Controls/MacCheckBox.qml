@@ -20,6 +20,9 @@ Basic.CheckBox {
         border.color: control.visualFocus ? Theme.accent : Theme.border
         border.width: control.visualFocus ? 2 : 1
         opacity: control.enabled ? 1 : 0.45
+        scale: control.down && !Theme.reducedMotion ? 0.91 : 1
+        Behavior on scale { NumberAnimation { duration: control.down ? Theme.pressDuration : Theme.releaseDuration; easing.type: Theme.motionEasing } }
+        Behavior on color { ColorAnimation { duration: Theme.colorDuration } }
         Text {
             anchors.centerIn: parent
             text: control.checkState === Qt.PartiallyChecked ? "−" : "✓"

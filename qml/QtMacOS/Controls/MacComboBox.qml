@@ -24,5 +24,6 @@ Basic.ComboBox {
         border.color: control.visualFocus ? Theme.accent : Theme.border
         border.width: control.visualFocus ? 2 : 1
         opacity: control.enabled ? 1 : 0.45
+        Behavior on color { ColorAnimation { duration: Theme.colorDuration } }
     }
 }

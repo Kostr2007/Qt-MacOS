@@ -1,3 +1,28 @@
 /build*/
+/cmake-build*/
+/qt-sdk/
+/.qt-sdk/
+/.cache/
+# Local reference downloads, research and raw capture sessions.
+/references/
+/reference-materials/
+/research/
+/captures/
+/recordings/
+/artifacts/
+/local/
+/Qt-MacOS-local*/
+/*.zip
+/*.tar.gz
+# Curated docs/screenshots and docs/media remain publishable.
 *.user
+*.user.*
+*.log
+*.autosave
+.DS_Store
+.idea/
+.vscode/
+.env
+.env.*
+!.env.example
 __pycache__/

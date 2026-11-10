@@ -77,6 +77,9 @@ TestCase {
         tryCompare(control.popup, "visible", true)
         const options = control.popup.contentItem
         tryCompare(options, "count", 3)
+        // visible precedes the first popup polish/render pass. Click actual
+        // painted rows while the reveal may still be running.
+        verify(waitForRendering(options))
         mouseClick(options.itemAtIndex(2))
         tryCompare(preferences, "secondaryClick", 2)
         tryCompare(control.popup, "visible", false)

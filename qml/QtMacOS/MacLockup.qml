@@ -12,6 +12,7 @@ Basic.ItemDelegate {
     property string kind: "folder"
     property color tint: "#52b9ed"
     property bool selected: false
+    property bool selectionActive: activeFocus
     signal activated()
     signal contextRequested(real x, real y)
 
@@ -30,10 +31,11 @@ Basic.ItemDelegate {
 
     background: Rectangle {
         radius: 9
-        color: control.selected ? Theme.selection : control.hovered ? Theme.hover : "transparent"
+        color: control.selected ? (control.selectionActive ? Theme.activeSelection : Theme.inactiveSelection) : control.hovered ? Theme.hover : "transparent"
         border.width: control.visualFocus ? 2 : 0
         border.color: Theme.settingsAccent
         opacity: control.enabled ? 1 : 0.45
+        Behavior on color { ColorAnimation { duration: Theme.colorDuration } }
     }
     contentItem: Column {
         spacing: 4
@@ -128,7 +130,7 @@ Basic.ItemDelegate {
             id: titleLabel
             width: parent.width
             text: control.title
-            color: Theme.settingsText
+            color: control.selected && control.selectionActive ? "white" : Theme.settingsText
             font.pixelSize: 13
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
@@ -140,7 +142,7 @@ Basic.ItemDelegate {
             text: control.subtitle
             visible: text.length > 0
             height: visible ? implicitHeight : 0
-            color: Theme.settingsSecondary
+            color: control.selected && control.selectionActive ? "white" : Theme.settingsSecondary
             font.pixelSize: 11
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight

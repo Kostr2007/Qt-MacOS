@@ -112,6 +112,7 @@ Item {
                             background: Rectangle {
                                 radius: 5
                                 color: tab.selected ? Theme.dark ? "#626266" : "white" : tab.hovered ? Theme.hover : "transparent"
+                                Behavior on color { ColorAnimation { duration: Theme.colorDuration } }
                                 border.width: tab.activeFocus ? 2 : tab.selected ? 1 : 0
                                 border.color: tab.activeFocus ? Theme.accent : Theme.dark ? "#77777b" : "#d0d0d3"
                             }
@@ -164,6 +165,14 @@ Item {
                     required property var modelData
                     readonly property string pageKey: modelData.key
                     active: true
+                    onVisibleChanged: if (visible) tabArrival.restart()
+                    NumberAnimation {
+                        id: tabArrival
+                        target: page; property: "opacity"
+                        from: 0; to: 1
+                        duration: Theme.revealDuration
+                        easing.type: Theme.motionEasing
+                    }
                     sourceComponent: root.pageDelegate
                     onLoaded: {
                         if (item && "pageKey" in item)

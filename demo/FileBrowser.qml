@@ -102,19 +102,39 @@ Rectangle {
         const tags = ["Red", "Orange", "Yellow", "Green", "Blue", "Purple", "Gray"];
         return files.filter(f => (!term || f.name.toLocaleLowerCase().includes(term)) && (!tags.includes(category) || f.tag === category) && (!["AirDrop", "Applications", "iCloud Drive"].includes(category)) && (category !== "Downloads" || f.preview >= 6) && (category !== "Desktop" || f.kind === "PNG image")).sort((a, b) => (ascending ? 1 : -1) * a.name.localeCompare(b.name));
     }
+    readonly property bool selectionActive: gridMode ? grid.activeFocus : list.activeFocus
     function selectIndex(index) {
-        if (index >= 0 && index < resultCount)
+        if (index >= 0 && index < resultCount) {
             selectedName = visibleFiles[index].name;
+            synchronizeSelection();
+        }
     }
-    onCategoryChanged: {
-        selectedName = "";
-        list.currentIndex = -1;
-        grid.currentIndex = -1;
+    function synchronizeSelection() {
+        const index = visibleFiles.findIndex(file => file.name === selectedName);
+        list.currentIndex = index;
+        grid.currentIndex = index;
+        if (index >= 0) {
+            if (gridMode) grid.positionViewAtIndex(index, GridView.Contain);
+            else list.positionViewAtIndex(index, ListView.Contain);
+        }
     }
-    onQueryChanged: {
-        selectedName = "";
-        list.currentIndex = -1;
-        grid.currentIndex = -1;
+    function moveSelection(step) {
+        const index = visibleFiles.findIndex(file => file.name === selectedName);
+        if (resultCount) selectIndex(index < 0 ? 0 : Math.max(0, Math.min(resultCount - 1, index + step)));
+    }
+    onSelectedNameChanged: synchronizeSelection()
+    onCategoryChanged: selectedName = ""
+    onVisibleFilesChanged: {
+        if (!visibleFiles.some(file => file.name === selectedName)) selectedName = "";
+        synchronizeSelection();
+    }
+    onGridModeChanged: {
+        const hadFocus = list.activeFocus || grid.activeFocus;
+        synchronizeSelection();
+        if (hadFocus) {
+            if (gridMode) grid.forceActiveFocus(Qt.OtherFocusReason);
+            else list.forceActiveFocus(Qt.OtherFocusReason);
+        }
     }
     color: transparentBackground ? "transparent" : Theme.dark ? "#252628" : "#ffffff"
     clip: true
@@ -233,20 +253,19 @@ Rectangle {
             objectName: "fileList"
             anchors.fill: parent
             model: browser.visibleFiles
+            onModelChanged: Qt.callLater(browser.synchronizeSelection)
             currentIndex: -1
             clip: true
             activeFocusOnTab: true
             boundsBehavior: Flickable.StopAtBounds
-            keyNavigationEnabled: true
-            onActiveFocusChanged: if (activeFocus && currentIndex < 0 && count > 0)
-                currentIndex = 0
-            Keys.onUpPressed: {
-                currentIndex = Math.max(0, currentIndex - 1);
-                browser.selectIndex(currentIndex);
-            }
-            Keys.onDownPressed: {
-                currentIndex = Math.min(count - 1, currentIndex + 1);
-                browser.selectIndex(currentIndex);
+            keyNavigationEnabled: false
+            Keys.onUpPressed: browser.moveSelection(-1)
+            Keys.onDownPressed: browser.moveSelection(1)
+            Keys.onPressed: event => {
+                if (event.key === Qt.Key_Home) browser.selectIndex(0);
+                else if (event.key === Qt.Key_End) browser.selectIndex(count - 1);
+                else return;
+                event.accepted = true;
             }
             ScrollBar.vertical: MacScrollBar {}
             delegate: ItemDelegate {
@@ -255,6 +274,8 @@ Rectangle {
                 required property int index
                 width: list.width
                 height: browser.rowHeight
+                focusPolicy: Qt.NoFocus
+                Accessible.selected: browser.selectedName === modelData.name
                 Accessible.name: fileRow.modelData.name
                 onClicked: {
                     list.currentIndex = index;
@@ -266,7 +287,8 @@ Rectangle {
                     width: parent.width - 26
                     height: parent.height
                     radius: 6
-                    color: browser.selectedName === fileRow.modelData.name ? list.activeFocus ? (Theme.dark ? "#245a97" : "#b3d6ff") : (Theme.dark ? "#555558" : "#d8d8db") : fileRow.hovered ? (Theme.dark ? "#16ffffff" : "#08000000") : "transparent"
+                    color: browser.selectedName === fileRow.modelData.name ? (browser.selectionActive ? Theme.activeSelection : Theme.inactiveSelection) : fileRow.hovered ? (Theme.dark ? "#16ffffff" : "#08000000") : "transparent"
+                    Behavior on color { ColorAnimation { duration: Theme.colorDuration } }
                 }
                 contentItem: Item {
                     FinderThumbnail {
@@ -281,7 +303,7 @@ Rectangle {
                         width: browser.nameWidth - 70
                         height: parent.height
                         text: fileRow.modelData.name
-                        color: browser.foreground
+                        color: browser.selectedName === fileRow.modelData.name && browser.selectionActive ? "white" : browser.foreground
                         font {
                             family: browser.fontFamily
                             pixelSize: 18
@@ -294,7 +316,7 @@ Rectangle {
                         width: browser.dateWidth - 18
                         height: parent.height
                         text: fileRow.modelData.date
-                        color: browser.secondary
+                        color: browser.selectedName === fileRow.modelData.name && browser.selectionActive ? "white" : browser.secondary
                         font {
                             family: browser.fontFamily
                             pixelSize: 18
@@ -307,7 +329,7 @@ Rectangle {
                         width: browser.sizeWidth - 12
                         height: parent.height
                         text: fileRow.modelData.size
-                        color: browser.secondary
+                        color: browser.selectedName === fileRow.modelData.name && browser.selectionActive ? "white" : browser.secondary
                         font {
                             family: browser.fontFamily
                             pixelSize: 18
@@ -320,7 +342,7 @@ Rectangle {
                         width: browser.kindWidth - 16
                         height: parent.height
                         text: fileRow.modelData.kind
-                        color: browser.secondary
+                        color: browser.selectedName === fileRow.modelData.name && browser.selectionActive ? "white" : browser.secondary
                         font {
                             family: browser.fontFamily
                             pixelSize: 18
@@ -342,30 +364,23 @@ Rectangle {
         }
         visible: browser.gridMode
         model: browser.visibleFiles
+        onModelChanged: Qt.callLater(browser.synchronizeSelection)
         currentIndex: -1
         cellWidth: 156
         cellHeight: 146
         clip: true
         activeFocusOnTab: true
         boundsBehavior: Flickable.StopAtBounds
-        keyNavigationEnabled: true
-        onActiveFocusChanged: if (activeFocus && currentIndex < 0 && count > 0)
-            currentIndex = 0
-        Keys.onRightPressed: {
-            currentIndex = Math.min(count - 1, currentIndex + 1);
-            browser.selectIndex(currentIndex);
-        }
-        Keys.onLeftPressed: {
-            currentIndex = Math.max(0, currentIndex - 1);
-            browser.selectIndex(currentIndex);
-        }
-        Keys.onUpPressed: {
-            currentIndex = Math.max(0, currentIndex - Math.max(1, Math.floor(width / cellWidth)));
-            browser.selectIndex(currentIndex);
-        }
-        Keys.onDownPressed: {
-            currentIndex = Math.min(count - 1, currentIndex + Math.max(1, Math.floor(width / cellWidth)));
-            browser.selectIndex(currentIndex);
+        keyNavigationEnabled: false
+        Keys.onRightPressed: browser.moveSelection(1)
+        Keys.onLeftPressed: browser.moveSelection(-1)
+        Keys.onUpPressed: browser.moveSelection(-Math.max(1, Math.floor(width / cellWidth)))
+        Keys.onDownPressed: browser.moveSelection(Math.max(1, Math.floor(width / cellWidth)))
+        Keys.onPressed: event => {
+            if (event.key === Qt.Key_Home) browser.selectIndex(0);
+            else if (event.key === Qt.Key_End) browser.selectIndex(count - 1);
+            else return;
+            event.accepted = true;
         }
         ScrollBar.vertical: MacScrollBar {}
         delegate: ItemDelegate {
@@ -374,6 +389,8 @@ Rectangle {
             required property int index
             width: grid.cellWidth
             height: grid.cellHeight
+            focusPolicy: Qt.NoFocus
+            Accessible.selected: browser.selectedName === modelData.name
             Accessible.name: gridRow.modelData.name
             onClicked: {
                 grid.currentIndex = index;
@@ -386,7 +403,8 @@ Rectangle {
                     margins: 4
                 }
                 radius: 6
-                color: browser.selectedName === gridRow.modelData.name ? (Theme.dark ? "#555558" : "#d8d8db") : "transparent"
+                color: browser.selectedName === gridRow.modelData.name ? (browser.selectionActive ? Theme.activeSelection : Theme.inactiveSelection) : "transparent"
+                Behavior on color { ColorAnimation { duration: Theme.colorDuration } }
             }
             contentItem: Column {
                 spacing: 10
@@ -399,7 +417,7 @@ Rectangle {
                 Text {
                     width: parent.width
                     text: gridRow.modelData.name
-                    color: browser.foreground
+                    color: browser.selectedName === gridRow.modelData.name && browser.selectionActive ? "white" : browser.foreground
                     font {
                         family: browser.fontFamily
                         pixelSize: 13

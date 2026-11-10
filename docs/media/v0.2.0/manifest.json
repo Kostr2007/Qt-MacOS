@@ -1,0 +1,255 @@
+{
+  "schema": 1,
+  "version": "0.2.0",
+  "created_utc": "2026-11-10T16:47:00.032236+00:00",
+  "gallery_sha256": "313c6d401623cf4e5219cef7180af48abe5796e8af7f4841ccfa6a9e086381b5",
+  "recordings": [
+    {
+      "scenario": "navigation",
+      "mode": "light",
+      "tests_sha256": "dbe10304f88bcacf19a5021c4579cec03c73d7eb2668f8425266b2788bc8b0c2",
+      "binary_changed_during_run": false,
+      "scenario_sha256": "eb85d542fa1a62052827ba56f9fb42f3e38ab30f652d56eb23d1639fbc49813b",
+      "source_video_sha256": "7d52c263e5a208a9fc8a0c28c8b7cc662d4956fb39864e872d1955ed6ae37717",
+      "qt_version": "6.12.0",
+      "platform": "xcb",
+      "graphics_api": 3,
+      "dpr": 1,
+      "samples": 155,
+      "input_events": 35
+    },
+    {
+      "scenario": "details",
+      "mode": "light",
+      "tests_sha256": "dbe10304f88bcacf19a5021c4579cec03c73d7eb2668f8425266b2788bc8b0c2",
+      "binary_changed_during_run": false,
+      "scenario_sha256": "d7e54c2e6b1b91a20540b3fbd210848683759ced77bd18b6315edd2f687c25d4",
+      "source_video_sha256": "c1beedc930082a91779053eabebea8ec9e4bedc7878abc0dc5058de8c47b8f4a",
+      "qt_version": "6.12.0",
+      "platform": "xcb",
+      "graphics_api": 3,
+      "dpr": 1,
+      "samples": 82,
+      "input_events": 39
+    },
+    {
+      "scenario": "popup",
+      "mode": "light",
+      "tests_sha256": "dbe10304f88bcacf19a5021c4579cec03c73d7eb2668f8425266b2788bc8b0c2",
+      "binary_changed_during_run": false,
+      "scenario_sha256": "288522fb500125cb2a76edb13594f2ce348c97266064b65f96fc19581f1b07f2",
+      "source_video_sha256": "874cfa649f0eb555e4956f0426e15d733785622c7ed19e2d7be2cb1db542c899",
+      "qt_version": "6.12.0",
+      "platform": "xcb",
+      "graphics_api": 3,
+      "dpr": 1,
+      "samples": 58,
+      "input_events": 23
+    },
+    {
+      "scenario": "popup",
+      "mode": "dark",
+      "tests_sha256": "dbe10304f88bcacf19a5021c4579cec03c73d7eb2668f8425266b2788bc8b0c2",
+      "binary_changed_during_run": false,
+      "scenario_sha256": "258218b992b32024b87f4cb4e9ef89b488c4e238115d1e95e9766b01ecee19b2",
+      "source_video_sha256": "e2ba4891044cfcd3651b23097dbc60f0ab90e7d651cff11b4fbe62485f71517b",
+      "qt_version": "6.12.0",
+      "platform": "xcb",
+      "graphics_api": 3,
+      "dpr": 1,
+      "samples": 58,
+      "input_events": 23
+    },
+    {
+      "scenario": "popup",
+      "mode": "reduced",
+      "tests_sha256": "dbe10304f88bcacf19a5021c4579cec03c73d7eb2668f8425266b2788bc8b0c2",
+      "binary_changed_during_run": false,
+      "scenario_sha256": "89f3f681b0814c2a3a8716d0a2050109dcf97090a785445972027ac5c1b34802",
+      "source_video_sha256": "939fa23d08e1e78ed99881a2a27f17efcb22e931fd34d56bbb41798756e80ac3",
+      "qt_version": "6.12.0",
+      "platform": "xcb",
+      "graphics_api": 3,
+      "dpr": 1,
+      "samples": 58,
+      "input_events": 23
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "settings-light.png",
+      "arguments": [
+        "--settings",
+        "--light",
+        "--presentation"
+      ],
+      "renderer": {
+        "devicePixelRatio": 1,
+        "graphicsApi": 3,
+        "platform": "xcb",
+        "software": false
+      },
+      "stderr_empty": true
+    },
+    {
+      "file": "settings-dark.png",
+      "arguments": [
+        "--settings",
+        "--dark",
+        "--presentation"
+      ],
+      "renderer": {
+        "devicePixelRatio": 1,
+        "graphicsApi": 3,
+        "platform": "xcb",
+        "software": false
+      },
+      "stderr_empty": true
+    },
+    {
+      "file": "motion-lab.png",
+      "arguments": [
+        "--motion-lab",
+        "--light",
+        "--presentation"
+      ],
+      "renderer": {
+        "devicePixelRatio": 1,
+        "graphicsApi": 3,
+        "platform": "xcb",
+        "software": false
+      },
+      "stderr_empty": true
+    },
+    {
+      "file": "help.png",
+      "scenario": "navigation-light",
+      "tag": "help-enter",
+      "sample_ms": 4443.513431,
+      "original_frame_sha256": "d3cbffdb4b689c868e9b75f6b29f044c3805cc5449017afdceb68425d2dd388a"
+    },
+    {
+      "file": "search.png",
+      "scenario": "details-light",
+      "tag": "result-focus",
+      "sample_ms": 422.969329,
+      "original_frame_sha256": "308a8d0d88ccbee8ce9ae00c3eaaf3b10a5549110f6839c10e0ef7d4fa8926ba"
+    },
+    {
+      "file": "inactive.png",
+      "scenario": "details-light",
+      "tag": "inactive-window",
+      "sample_ms": 3523.394663,
+      "original_frame_sha256": "7163622d90529d8baa89bb3ba1d9d0a2bdb3d373a32e838213138b0b803f471f"
+    },
+    {
+      "file": "popup.png",
+      "scenario": "popup-light",
+      "tag": "hover-third",
+      "sample_ms": 805.530914,
+      "original_frame_sha256": "d948c63d41c6d1060507003e2e044429fa1db28ff04f3fb113004a063c624d93"
+    },
+    {
+      "file": "popup-dark.png",
+      "scenario": "popup-dark",
+      "tag": "hover-third",
+      "sample_ms": 818.185775,
+      "original_frame_sha256": "48d5c1829c97d5499de84571246f5d69f8d326be34324a5ffea3e625eee16d46"
+    }
+  ],
+  "assets": [
+    {
+      "file": "help.png",
+      "bytes": 125404,
+      "sha256": "d3cbffdb4b689c868e9b75f6b29f044c3805cc5449017afdceb68425d2dd388a",
+      "physical_size": [
+        1261,
+        671
+      ]
+    },
+    {
+      "file": "inactive.png",
+      "bytes": 103010,
+      "sha256": "7163622d90529d8baa89bb3ba1d9d0a2bdb3d373a32e838213138b0b803f471f",
+      "physical_size": [
+        1261,
+        671
+      ]
+    },
+    {
+      "file": "interactions.mp4",
+      "bytes": 191266,
+      "sha256": "12fc513d5d49996a0565492cb08bacf321af690c3d87d975a511f75201864504"
+    },
+    {
+      "file": "motion-lab.png",
+      "bytes": 88072,
+      "sha256": "5d194a3ac4ed5eb4d57e757414678f0583d9702383eaaaaf3297168dcf45114b",
+      "physical_size": [
+        1060,
+        850
+      ]
+    },
+    {
+      "file": "popup-dark.png",
+      "bytes": 114282,
+      "sha256": "48d5c1829c97d5499de84571246f5d69f8d326be34324a5ffea3e625eee16d46",
+      "physical_size": [
+        1261,
+        671
+      ]
+    },
+    {
+      "file": "popup-preview.gif",
+      "bytes": 122761,
+      "sha256": "577d4523b56283b99f28d4d3e05d9ca93d46abd5e67220a101dac4907dd98d87"
+    },
+    {
+      "file": "popup-reduced-motion.mp4",
+      "bytes": 61799,
+      "sha256": "939fa23d08e1e78ed99881a2a27f17efcb22e931fd34d56bbb41798756e80ac3"
+    },
+    {
+      "file": "popup-selection.mp4",
+      "bytes": 76925,
+      "sha256": "874cfa649f0eb555e4956f0426e15d733785622c7ed19e2d7be2cb1db542c899"
+    },
+    {
+      "file": "popup.png",
+      "bytes": 114059,
+      "sha256": "d948c63d41c6d1060507003e2e044429fa1db28ff04f3fb113004a063c624d93",
+      "physical_size": [
+        1261,
+        671
+      ]
+    },
+    {
+      "file": "search.png",
+      "bytes": 67274,
+      "sha256": "308a8d0d88ccbee8ce9ae00c3eaaf3b10a5549110f6839c10e0ef7d4fa8926ba",
+      "physical_size": [
+        1261,
+        671
+      ]
+    },
+    {
+      "file": "settings-dark.png",
+      "bytes": 126079,
+      "sha256": "ae8770dd0201a350f765b00de98fb8c55df09d84a53baaf7032aa4293eae0964",
+      "physical_size": [
+        1048,
+        910
+      ]
+    },
+    {
+      "file": "settings-light.png",
+      "bytes": 125540,
+      "sha256": "4a6e45459af4954e62b510402446f7e9d600ceffef0ecfc811a2beda36992991",
+      "physical_size": [
+        1048,
+        910
+      ]
+    }
+  ],
+  "note": "Original PNGs. MP4 overview resizes/letterboxes actual timestamped Qt captures; GIF is a sampled preview. Instrumented capture is not a display FPS/latency measurement."
+}

@@ -7,9 +7,10 @@
 - CMake 3.21 or later, a C++17 compiler, and Ninja or the native build tool.
 - Qt 6 with Quick, Quick Controls 2, the QML runtime modules and SVG image
   support. Quick Test and Qt Test are required for the default test build.
+- The QtQuick.Shapes runtime module renders the original Settings/window symbols.
 - Python 3 only if you want to use the screenshot automation scripts.
 
-Qt 6.8.2 is the development/test version. CMake declares Qt 6.4 as the minimum;
+Current local development uses Qt 6.12.0; CI uses Qt 6.8.2. CMake declares Qt 6.4 as the minimum;
 that minimum has not yet been verified separately. Use one matching Qt kit and
 compiler (MSVC with MSVC Qt on Windows, for example). Do not mix libraries from
 different Qt versions. The Qt installer can add the desktop kit and its modules.
@@ -152,8 +153,29 @@ fixed comparison background; it is not a live desktop blur. The checked-in
 | macOS linker cannot find AGL | Qt 6.8.2 needs the older SDK; CI uses macOS 15 with Xcode 16.4. The macOS 26 SDK removed AGL. Select a compatible SDK or validate an updated Qt kit. |
 | Opaque/shadowless outer window | Check compositor/alpha support; native window systems differ |
 
-Local validation used Debian 13, GCC 14.2, CMake 3.31.6 and Qt 6.8.2. The local
+Version 0.2.0 is locally validated on NixOS 26.11, GCC 16 and Qt 6.12.0.
+The original baseline used Debian 13, GCC 14.2, CMake 3.31.6 and Qt 6.8.2. The local
 QtTest model tester emits an `invalid type 4097` warning in its constructor;
 it was reproduced outside this project with a minimal model. Model assertions
 pass; final gallery captures have clean diagnostics. See
 [detailed evidence](LAYOUT_IMPLEMENTATION.ru.md) and Actions for each check's limits.
+
+## Interaction recording and Motion Lab
+
+Run `./build/qtmacos-gallery --motion-lab` to compare slider feedback profiles.
+Settings supports `--reduce-motion` and `--differentiate-without-color`. Consumers
+can set `Theme.reducedMotion` and `Theme.differentiateWithoutColor` directly.
+Diagnostics are linked only into the gallery/tests, not the public QML library.
+
+```sh
+python3 scripts/record_interactions.py --scenario popup --platform xcb \
+  --backend auto --output recordings/popup --ffmpeg /path/to/ffmpeg
+python3 scripts/review_interactions.py --run /path/to/recorded-run \
+  --output recordings/review
+```
+
+Available scenarios: `slider`, `navigation`, `details`, `popup`. Use `--dark` or
+`--reduced-motion` to compare variants. QtTest and Python 3 are needed; ffmpeg is
+optional for PNG/state capture and required for video. X11 scenarios require an
+actual desktop. Offscreen captures do not establish native window behavior.
+[Published videos and provenance](MEDIA_GALLERY.md).

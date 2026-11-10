@@ -14,6 +14,13 @@ MacWindow {
     surfaceObjectName: "preferencesFrame"
     surfaceColor: Theme.dark ? "#222225" : "#ffffff"
     title: pageTitle + " — Qt-MacOS Settings"
+    property var pendingDialog: null
+    function openDialog(dialog) {
+        if (help.visible) {
+            pendingDialog = dialog;
+            help.close();
+        } else dialog.open();
+    }
     readonly property var sections: [
         {
             key: "Notifications",
@@ -97,6 +104,8 @@ MacWindow {
     property string pageTitle: "Mouse"
     property var history: ["Settings", "Mouse"]
     property int historyIndex: 1
+    property int navigationDirection: 0
+    property real pageProgress: 1
     property real trackingSpeed: 0.45
     property real doubleClickSpeed: 0.79
     property real scrollingSpeed: 0.56
@@ -107,9 +116,23 @@ MacWindow {
     function navigate(page) {
         if (page === pageTitle)
             return;
+        navigationDirection = 0;
         history = history.slice(0, historyIndex + 1).concat([page]);
         historyIndex = history.length - 1;
         pageTitle = page;
+    }
+    onPageTitleChanged: {
+        if (help) help.close();
+        if (pageArrival) pageArrival.restart();
+        if (page) page.contentY = 0;
+    }
+    NumberAnimation {
+        id: pageArrival
+        target: window
+        property: "pageProgress"
+        from: 0; to: 1
+        duration: Theme.pageDuration
+        easing.type: Easing.OutCubic
     }
     function resetPreferences() {
         trackingSpeed = 0.45;
@@ -121,7 +144,9 @@ MacWindow {
     }
     Component.onCompleted: {
         const args = Qt.application.arguments;
+        Theme.reducedMotion = args.indexOf("--reduce-motion") >= 0;
         Theme.dark = args.indexOf("--dark") >= 0;
+        Theme.differentiateWithoutColor = args.indexOf("--differentiate-without-color") >= 0;
         naturalScrolling = args.indexOf("--natural-on") >= 0;
         if (args.indexOf("--advanced") >= 0)
             Qt.callLater(() => advanced.open());
@@ -130,7 +155,8 @@ MacWindow {
     }
 
     Shortcut {
-        sequence: StandardKey.Find
+        sequences: [StandardKey.Find]
+        enabled: !advanced.visible && !bluetooth.visible && !help.visible
         onActivated: navigation.focusSearch()
     }
     Shortcut {
@@ -151,6 +177,7 @@ MacWindow {
         width: 306
         radius: Math.max(0, window.corner - 1)
         dark: Theme.dark
+        windowActive: window.active || window.presentation
         fontFamily: window.font.family
         currentKey: window.pageTitle
         onNavigate: key => window.navigate(key)
@@ -158,8 +185,8 @@ MacWindow {
     WindowButtons {
         x: 26
         y: 27
-        scale: 1.25
-        transformOrigin: Item.TopLeft
+        buttonDiameter: 18
+        spacing: 12
         dark: Theme.dark
         windowActive: window.active || window.presentation
         onCloseRequested: window.close()
@@ -185,25 +212,31 @@ MacWindow {
             radius: 20
             color: Theme.dark ? "#303034" : "#fafafa"
             Row {
-                anchors.centerIn: parent
+                anchors.fill: parent
                 FinderToolButton {
                     objectName: "preferencesBack"
+                    width: 46; height: 50
+                    capsuleSide: -1
                     symbol: "back"
                     text: qsTr("Back")
                     glyphColor: Theme.dark ? "#b4b4b8" : "#65656a"
                     enabled: window.historyIndex > 0
                     onClicked: {
+                        window.navigationDirection = -1;
                         --window.historyIndex;
                         window.pageTitle = window.history[window.historyIndex];
                     }
                 }
                 FinderToolButton {
                     objectName: "preferencesForward"
+                    width: 46; height: 50
+                    capsuleSide: 1
                     symbol: "forward"
                     text: qsTr("Forward")
                     glyphColor: Theme.dark ? "#b4b4b8" : "#65656a"
                     enabled: window.historyIndex < window.history.length - 1
                     onClicked: {
+                        window.navigationDirection = 1;
                         ++window.historyIndex;
                         window.pageTitle = window.history[window.historyIndex];
                     }
@@ -214,6 +247,7 @@ MacWindow {
             x: 128
             anchors.verticalCenter: parent.verticalCenter
             text: window.pageTitle
+            opacity: 0.55 + 0.45 * window.pageProgress
             color: window.foreground
             font {
                 family: window.font.family
@@ -224,6 +258,9 @@ MacWindow {
     }
     Flickable {
         id: page
+        objectName: "preferencesPage"
+        opacity: 0.55 + 0.45 * window.pageProgress
+        transform: Translate { x: Theme.reducedMotion ? 0 : window.navigationDirection * 10 * (1 - window.pageProgress) }
         x: navigation.width + 1
         y: header.height + 1
         width: parent.width - x - 1
@@ -336,7 +373,7 @@ MacWindow {
                     text: qsTr("Advanced…")
                     font.family: window.font.family
                     implicitWidth: 130
-                    onClicked: advanced.open()
+                    onClicked: window.openDialog(advanced)
                 }
                 MacPushButton {
                     id: bluetoothButton
@@ -344,7 +381,7 @@ MacWindow {
                     text: qsTr("Set Up Bluetooth Mouse…")
                     font.family: window.font.family
                     implicitWidth: 250
-                    onClicked: bluetooth.open()
+                    onClicked: window.openDialog(bluetooth)
                 }
                 MacHelpButton {
                     id: helpButton
@@ -352,7 +389,7 @@ MacWindow {
                     text: "?"
                     font.family: window.font.family
                     implicitWidth: 32
-                    onClicked: help.open()
+                    onClicked: help.toggle()
                     Accessible.name: qsTr("Mouse settings help")
                 }
             }
@@ -435,22 +472,19 @@ MacWindow {
             font.family: window.font.family
         }
     }
-    Popup {
+    MacPopover {
         id: help
-        focus: true
-        onClosed: helpButton.forceActiveFocus()
         objectName: "mouseHelp"
-        parent: Overlay.overlay
-        x: window.width - width - window.frameMargin - 24
-        y: window.frameMargin + 470
-        width: 320
-        padding: 18
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        background: Rectangle {
-            radius: 12
-            color: Theme.settingsGroup
-            border.color: Theme.settingsSeparator
+        anchorItem: helpButton
+        edgeMargin: window.frameMargin + 16
+        onClosed: {
+            if (window.pendingDialog) {
+                const dialog = window.pendingDialog;
+                window.pendingDialog = null;
+                Qt.callLater(() => dialog.open());
+            }
         }
+        width: 320
         contentItem: Text {
             text: qsTr("Drag a slider or use arrow keys. Changes stay in this demo. Advanced → Reset restores defaults.")
             wrapMode: Text.Wrap

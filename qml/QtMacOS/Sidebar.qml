@@ -37,11 +37,10 @@ Rectangle {
                 palette.text: Theme.text
                 palette.highlightedText: Theme.text
                 highlighted: root.currentIndex === index
-                background: Rectangle {
-                    radius: Theme.radius
-                    color: navigationRow.highlighted ? Theme.selection : navigationRow.hovered ? Theme.hover : "transparent"
-                    border.width: navigationRow.visualFocus ? 2 : 0
-                    border.color: Theme.accent
+                background: MacSelectionBackground {
+                    selected: navigationRow.highlighted
+                    hovered: navigationRow.hovered
+                    focused: navigationRow.visualFocus
                 }
                 onClicked: { root.currentIndex = index; root.activated(index) }
             }

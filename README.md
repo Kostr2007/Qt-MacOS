@@ -11,8 +11,8 @@ includes a Finder-inspired browser, Mouse settings, and ten layout families
 informed by Apple's Human Interface Guidelines. The components expose selection,
 navigation, model and editing contracts for your own application data.
 
-**Status: v0.1.0 preview, source release.** Linux rendering and X11 window
-behavior have been tested locally with Qt 6.8.2. The project targets Windows,
+**Status: v0.2.0 preview, source release.** Current interactions are tested locally
+on NixOS / Qt 6.12.0 / X11; the original baseline used Qt 6.8.2. The project targets Windows,
 Linux and macOS; the [CI matrix](.github/workflows/build.yml) checks all three.
 Native Windows/macOS behavior remains to be validated on those systems.
 
@@ -29,11 +29,21 @@ appearance, window dragging, resizing and working window buttons.
 
 ### Mouse settings
 
-![Light Mouse settings gallery running on Linux](docs/screenshots/settings-linux-light.png)
+![Qt-MacOS 0.2.0 Mouse settings on Linux](docs/media/v0.2.0/settings-light.png)
+
+![Animated popup selection preview](docs/media/v0.2.0/popup-preview.gif)
+
+[Watch the interaction video](docs/media/v0.2.0/interactions.mp4) ·
+[Current screenshots, videos and provenance](docs/MEDIA_GALLERY.md) ·
+[Release notes](docs/RELEASE_NOTES_v0.2.0.md)
 
 Sliders, switch, popup, grouped rows, sidebar, Advanced dialog and contextual
 help share the component library. The scene stores demo settings in memory;
 it does not modify OS mouse settings.
+[Navigation motion](docs/NAVIGATION_MOTION.ru.md) covers anchored help, flowing
+sidebar feedback, history transitions and reproducible interaction captures.
+[Interaction details](docs/HIG_DETAILS.ru.md) adds search clearing, keyboard
+navigation, inactive selection and optional on/off switch symbols.
 [Dark appearance](docs/screenshots/settings-linux-dark.png) ·
 [Advanced dialog](docs/screenshots/settings-linux-advanced.png) · [Details](docs/SETTINGS_LINUX.md)
 
@@ -67,8 +77,8 @@ has 10,000-entry virtualization coverage; images alone do not establish behavior
 ## Build and run
 
 Install CMake ≥ 3.21, a C++17 compiler and a compatible Qt 6 kit with Quick,
-Quick Controls 2, Quick Test and the SVG image plugin. Qt 6.8.2 is the tested
-version; the declared minimum is 6.4 and has not been separately validated.
+Quick Controls 2, Quick Test and the SVG image plugin. Local validation uses
+Qt 6.12.0 and CI uses Qt 6.8.2; the declared minimum is 6.4 and has not been separately validated.
 See [the full guide](docs/GETTING_STARTED.md) for installation and troubleshooting.
 
 ```sh
@@ -81,6 +91,7 @@ ctest --test-dir build -C Release --output-on-failure --no-tests=error
 ./build/qtmacos-gallery
 ./build/qtmacos-gallery --settings
 ./build/qtmacos-gallery --layout --page columns
+./build/qtmacos-gallery --motion-lab
 ```
 
 If CMake cannot find Qt, pass `-DCMAKE_PREFIX_PATH=/path/to/your/Qt/kit`.
@@ -125,6 +136,10 @@ the library with a real application's schema and backend. Its cumulative patch
 is tested against a pinned commit; it is not a complete Obsidian redesign.
 
 ## Scope and verification
+
+Controls now share brief press/release, state and popup transitions. Set
+`Theme.reducedMotion` in a consumer, or pass `--reduce-motion` to the gallery.
+See the [interaction audit, Apple HIG references and validation](docs/INTERACTION_MOTION.ru.md).
 
 The library uses an original QML window shell, Inter and original vector art.
 Real macOS vibrancy/background blur, Liquid Glass, native AppKit parity,

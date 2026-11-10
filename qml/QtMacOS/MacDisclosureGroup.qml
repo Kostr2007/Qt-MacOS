@@ -8,7 +8,7 @@ Item {
     default property alias content: contents.data
     property string title: ""
     property bool expanded: false
-    property bool reducedMotion: false
+    property bool reducedMotion: Theme.reducedMotion
     property real spacing: 8
     property real indentation: 20
     readonly property alias header: toggle
@@ -70,7 +70,8 @@ Item {
                     Behavior on rotation {
                         enabled: !group.reducedMotion
                         NumberAnimation {
-                            duration: 100
+                            duration: Theme.colorDuration
+                            easing.type: Theme.motionEasing
                         }
                     }
                     Accessible.ignored: true
@@ -102,7 +103,7 @@ Item {
             Behavior on height {
                 enabled: !group.reducedMotion
                 NumberAnimation {
-                    duration: 120
+                    duration: Theme.revealDuration
                     easing.type: Easing.OutCubic
                 }
             }

@@ -41,7 +41,7 @@ Item {
         }
         function test_listKeyboardSelection() {
             const list = findChild(browser, "fileList")
-            list.forceActiveFocus(); list.currentIndex = 0
+            list.forceActiveFocus(); browser.selectIndex(0)
             keyClick(Qt.Key_Down)
             compare(list.currentIndex, 1)
             compare(browser.selectedName, browser.visibleFiles[1].name)
@@ -49,10 +49,41 @@ Item {
         function test_gridNavigation() {
             browser.gridMode = true
             const grid = findChild(browser, "fileGrid")
-            grid.forceActiveFocus(); grid.currentIndex = 0
+            grid.forceActiveFocus(); browser.selectIndex(0)
             keyClick(Qt.Key_Right)
             compare(grid.currentIndex, 1)
             compare(browser.selectedName, browser.visibleFiles[1].name)
+        }
+        function test_firstArrowSelectsFirstItem() {
+            const list = findChild(browser, "fileList")
+            list.forceActiveFocus()
+            keyClick(Qt.Key_Down)
+            compare(browser.selectedName, browser.visibleFiles[0].name)
+            compare(list.currentIndex, 0)
+        }
+        function test_sortAndViewChangeKeepSelectionAndFocus() {
+            const list = findChild(browser, "fileList")
+            const grid = findChild(browser, "fileGrid")
+            browser.selectIndex(2)
+            const name = browser.selectedName
+            browser.ascending = false
+            compare(browser.selectedName, name)
+            tryCompare(list, "currentIndex", 6)
+            list.forceActiveFocus()
+            browser.gridMode = true
+            tryCompare(grid, "activeFocus", true)
+            compare(grid.currentIndex, 6)
+            keyClick(Qt.Key_Home)
+            compare(browser.selectedName, browser.visibleFiles[0].name)
+        }
+        function test_filterRetainsOnlyVisibleSelection() {
+            browser.selectIndex(0)
+            const name = browser.selectedName
+            browser.query = "png"
+            compare(browser.selectedName, name)
+            browser.query = "missing"
+            compare(browser.selectedName, "")
+            compare(findChild(browser, "fileList").currentIndex, -1)
         }
     }
 }

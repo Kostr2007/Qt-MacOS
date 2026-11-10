@@ -11,6 +11,10 @@ Basic.Button {
     rightPadding: 12
     spacing: 6
     hoverEnabled: true
+    scale: down && enabled ? Theme.pressedScale : 1
+    Behavior on scale {
+        NumberAnimation { duration: control.down ? Theme.pressDuration : Theme.releaseDuration; easing.type: Theme.motionEasing }
+    }
     font.pixelSize: 13
     icon.width: 16
     icon.height: 16
@@ -30,5 +34,6 @@ Basic.Button {
         border.color: control.visualFocus ? Theme.accent : Theme.border
         border.width: control.visualFocus ? 2 : control.flat && !control.checked ? 0 : 1
         opacity: control.enabled ? 1 : 0.45
+        Behavior on color { ColorAnimation { duration: control.down ? Theme.pressDuration : Theme.colorDuration } }
     }
 }

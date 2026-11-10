@@ -5,6 +5,7 @@ import QtMacOS
 
 FocusScope {
     id: control
+    activeFocusOnTab: true
     implicitWidth: 320
     implicitHeight: 320
     property var model
@@ -83,6 +84,7 @@ FocusScope {
             radius: 5
             color: selected ? (control.activeFocus ? Theme.accent : Theme.selection)
                             : (hover.hovered ? Theme.hover : "transparent")
+            Behavior on color { ColorAnimation { duration: Theme.colorDuration } }
             Accessible.role: Accessible.ListItem
             Accessible.name: String(model.title)
             Accessible.selected: selected
